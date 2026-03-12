@@ -105,34 +105,34 @@ const PhotoPlane: React.FC<PhotoPlaneProps> = ({
     // 只在散开状态可见
     meshRef.current.visible = shouldShow;
     
-    if (shouldShow) {
-      // 朝向相机
-      meshRef.current.lookAt(cameraPos);
-      meshRef.current.renderOrder = 999;
-      
-      if (meshRef.current.material) {
-        const material = meshRef.current.material as THREE.MeshBasicMaterial;
-        material.depthTest = false;
-        material.depthWrite = false;
-        material.transparent = true;
-        opacityRef.current = THREE.MathUtils.lerp(opacityRef.current, 1, delta * 5);
-        material.opacity = opacityRef.current;
-        material.needsUpdate = true;
-      }
-      
-      if (!isSelected) {
-        idleTimer.current += delta;
-        if (idleTimer.current > 2) {
-          rotationVelocity.current = 0.1;
-        }
-      }
-      
-      meshRef.current.position.lerp(targetPosition.current, delta * 3);
-      
-      const scaleLerp = THREE.MathUtils.lerp(currentScale.current, targetScale.current, delta * 5);
-      currentScale.current = scaleLerp;
-      meshRef.current.scale.set(scaleLerp, scaleLerp, scaleLerp);
+    // 朝向相机
+    meshRef.current.lookAt(cameraPos);
+    meshRef.current.renderOrder = 999;
+    
+    if (meshRef.current.material) {
+      const material = meshRef.current.material as THREE.MeshBasicMaterial;
+      material.depthTest = false;
+      material.depthWrite = false;
+      material.transparent = true;
+      opacityRef.current = THREE.MathUtils.lerp(opacityRef.current, shouldShow ? 1 : 0, delta * 5);
+      material.opacity = opacityRef.current;
+      material.needsUpdate = true;
     }
+    
+    meshRef.current.visible = opacityRef.current > 0.1;
+    
+    if (shouldShow && !isSelected) {
+      idleTimer.current += delta;
+      if (idleTimer.current > 2) {
+        rotationVelocity.current = 0.1;
+      }
+    }
+    
+    meshRef.current.position.lerp(targetPosition.current, delta * 3);
+    
+    const scaleLerp = THREE.MathUtils.lerp(currentScale.current, targetScale.current, delta * 5);
+    currentScale.current = scaleLerp;
+    meshRef.current.scale.set(scaleLerp, scaleLerp, scaleLerp);
   });
   
   const material = useMemo(() => {
@@ -306,10 +306,10 @@ export const PhotoPlanes: React.FC<PhotoPlanesProps> = ({ state, photoPaths }) =
   useFrame((state, delta) => {
     if (!groupRef.current) return;
     
-    const isVisible = state === 'SCATTERED';
-    groupRef.current.visible = isVisible;
+    groupRef.current.visible = true;
+    groupRef.current.renderOrder = 1000;
     
-    if (isVisible && selectedIndex === null) {
+    if (state === 'SCATTERED' && selectedIndex === null) {
       groupRef.current.rotation.y += delta * 0.1;
     }
   });
