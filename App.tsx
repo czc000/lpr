@@ -9,14 +9,10 @@ function App() {
   const [handRotation, setHandRotation] = useState(0);
   
   const photoPaths = [
-    'IMG_20230311_161453.jpg',
-    'IMG_20250613_170359.jpg',
-    'IMG_20250824_183732.jpg',
-    'IMG_20250927_204031.jpg',
-    'mmexport1738551898827.jpg',
-    'mmexport1749642699957.jpg',
-    'retouch_2023120920433815_edit_288345382350272.jpg',
-    'retouch_2025100900031123.jpg',
+    'photo1.jpg',
+    'photo2.jpg',
+    'photo3.jpg',
+    'photo4.jpg',
   ];
 
   const handleToggle = () => {
