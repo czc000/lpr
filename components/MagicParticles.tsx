@@ -99,7 +99,7 @@ function createParticle(
   switch (type) {
     case 'STAR':
       colorPalette = PALETTE.STAR;
-      scale = 1.5;
+      scale = 3.0;
       break;
     case 'RIBBON':
       colorPalette = PALETTE.RIBBON;
