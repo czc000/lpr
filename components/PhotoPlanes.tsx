@@ -98,10 +98,22 @@ const PhotoPlane: React.FC<PhotoPlaneProps> = ({
     if (!meshRef.current) return;
     
     const cameraPos = camera.position;
-    const distance = cameraPos.distanceTo(targetPosition.current);
     
     // 始终朝向相机
     meshRef.current.lookAt(cameraPos);
+    
+    // 确保可见
+    meshRef.current.visible = true;
+    meshRef.current.renderOrder = 999;
+    
+    if (meshRef.current.material) {
+      const material = meshRef.current.material as THREE.MeshBasicMaterial;
+      material.depthTest = false;
+      material.depthWrite = false;
+      material.transparent = true;
+      material.opacity = 1;
+      material.needsUpdate = true;
+    }
     
     if (isVisible && !isSelected) {
       idleTimer.current += delta;
@@ -115,12 +127,6 @@ const PhotoPlane: React.FC<PhotoPlaneProps> = ({
     const scaleLerp = THREE.MathUtils.lerp(currentScale.current, targetScale.current, delta * 5);
     currentScale.current = scaleLerp;
     meshRef.current.scale.set(scaleLerp, scaleLerp, scaleLerp);
-    
-    if (meshRef.current.material) {
-      const material = meshRef.current.material as THREE.MeshBasicMaterial;
-      opacityRef.current = THREE.MathUtils.lerp(opacityRef.current, targetOpacity.current, delta * 3);
-      material.opacity = Math.max(0.95, opacityRef.current);
-    }
   });
   
   const material = useMemo(() => {
@@ -295,10 +301,10 @@ export const PhotoPlanes: React.FC<PhotoPlanesProps> = ({ state, photoPaths }) =
     if (!groupRef.current) return;
     
     const isVisible = state === 'SCATTERED';
-    groupRef.current.visible = isVisible;
+    groupRef.current.visible = true; // 始终可见
+    groupRef.current.renderOrder = 1000;
     
     if (isVisible) {
-      console.log('照片组可见，子元素数量:', groupRef.current.children.length);
       if (selectedIndex === null) {
         groupRef.current.rotation.y += delta * 0.1;
       }

@@ -61,9 +61,9 @@ const SceneContent: React.FC<{ state: ParticleState, handRotation: number, photo
 export const Experience: React.FC<ExperienceProps> = ({ state, handRotation, photoPaths = [] }) => {
   return (
     <Canvas
-      camera={{ position: [0, 0, 14], fov: 45 }}
+      camera={{ position: [0, 0, 20], fov: 60 }}
       dpr={[1, 1.5]}
-      gl={{ antialias: false, toneMappingExposure: 1.1, powerPreference: "high-performance" }}
+      gl={{ antialias: false, toneMappingExposure: 1.1, powerPreference: "high-performance", alpha: true, preserveDrawingBuffer: true }}
     >
       <color attach="background" args={['#0d1520']} />
 
