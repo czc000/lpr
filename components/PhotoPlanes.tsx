@@ -100,9 +100,8 @@ const PhotoPlane: React.FC<PhotoPlaneProps> = ({
     const cameraPos = camera.position;
     const distance = cameraPos.distanceTo(targetPosition.current);
     
-    if (isSelected || distance < 0.1) {
-      meshRef.current.lookAt(cameraPos);
-    }
+    // 始终朝向相机
+    meshRef.current.lookAt(cameraPos);
     
     if (isVisible && !isSelected) {
       idleTimer.current += delta;
@@ -130,11 +129,14 @@ const PhotoPlane: React.FC<PhotoPlaneProps> = ({
       return new THREE.MeshBasicMaterial({
         color: 0xff0000,
         transparent: true,
-        opacity: 1
+        opacity: 1,
+        side: THREE.DoubleSide
       });
     }
     
     texture.colorSpace = THREE.SRGBColorSpace;
+    texture.needsUpdate = true;
+    console.log('创建照片材质，纹理大小:', texture.image.width, 'x', texture.image.height);
     return new THREE.MeshBasicMaterial({
       map: texture,
       transparent: true,
@@ -295,8 +297,11 @@ export const PhotoPlanes: React.FC<PhotoPlanesProps> = ({ state, photoPaths }) =
     const isVisible = state === 'SCATTERED';
     groupRef.current.visible = isVisible;
     
-    if (isVisible && selectedIndex === null) {
-      groupRef.current.rotation.y += delta * 0.1;
+    if (isVisible) {
+      console.log('照片组可见，子元素数量:', groupRef.current.children.length);
+      if (selectedIndex === null) {
+        groupRef.current.rotation.y += delta * 0.1;
+      }
     }
   });
   
