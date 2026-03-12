@@ -13,6 +13,7 @@ function App() {
     'photo2.jpg',
     'photo3.jpg',
     'photo4.jpg',
+    'photo5.jpg',
   ];
 
   const handleToggle = () => {
