@@ -36,6 +36,7 @@ interface PhotoPlaneProps {
   isVisible: boolean;
   isSelected: boolean;
   onMeshRef: (mesh: THREE.Mesh | null) => void;
+  globalState: ParticleState;
 }
 
 const PhotoPlane: React.FC<PhotoPlaneProps> = ({
@@ -45,7 +46,8 @@ const PhotoPlane: React.FC<PhotoPlaneProps> = ({
   texture,
   isVisible,
   isSelected,
-  onMeshRef
+  onMeshRef,
+  globalState
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const { camera } = useThree();
@@ -98,11 +100,12 @@ const PhotoPlane: React.FC<PhotoPlaneProps> = ({
     if (!meshRef.current) return;
     
     const cameraPos = camera.position;
+    const shouldShow = globalState === 'SCATTERED';
     
     // 只在散开状态可见
-    meshRef.current.visible = isVisible;
+    meshRef.current.visible = shouldShow;
     
-    if (isVisible) {
+    if (shouldShow) {
       // 朝向相机
       meshRef.current.lookAt(cameraPos);
       meshRef.current.renderOrder = 999;
@@ -112,7 +115,8 @@ const PhotoPlane: React.FC<PhotoPlaneProps> = ({
         material.depthTest = false;
         material.depthWrite = false;
         material.transparent = true;
-        material.opacity = THREE.MathUtils.lerp(opacityRef.current, 1, delta * 3);
+        opacityRef.current = THREE.MathUtils.lerp(opacityRef.current, 1, delta * 5);
+        material.opacity = opacityRef.current;
         material.needsUpdate = true;
       }
       
@@ -331,6 +335,7 @@ export const PhotoPlanes: React.FC<PhotoPlanesProps> = ({ state, photoPaths }) =
             texture={texture}
             isVisible={state === 'SCATTERED'}
             isSelected={selectedIndex === index}
+            globalState={state}
             onMeshRef={(mesh) => {
               if (mesh) {
                 meshMap.current.set(mesh, index);
