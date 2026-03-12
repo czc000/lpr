@@ -50,8 +50,8 @@ const PhotoPlane: React.FC<PhotoPlaneProps> = ({
   const meshRef = useRef<THREE.Mesh>(null);
   const { camera } = useThree();
   const targetPosition = useRef(new THREE.Vector3(...position));
-  const currentScale = useRef(1.5);
-  const targetScale = useRef(1.5);
+  const currentScale = useRef(0.5);
+  const targetScale = useRef(0.5);
   const opacityRef = useRef(0);
   const targetOpacity = useRef(0);
   const rotationVelocity = useRef(0);
@@ -86,10 +86,10 @@ const PhotoPlane: React.FC<PhotoPlaneProps> = ({
   
   useEffect(() => {
     if (isSelected) {
-      targetScale.current = 3;
+      targetScale.current = 1.2;
       targetPosition.current.set(0, 0.5, -8);
     } else {
-      targetScale.current = 1.5;
+      targetScale.current = 0.5;
       targetPosition.current.set(...position);
     }
   }, [isSelected, position]);
@@ -99,34 +99,36 @@ const PhotoPlane: React.FC<PhotoPlaneProps> = ({
     
     const cameraPos = camera.position;
     
-    // 始终朝向相机
-    meshRef.current.lookAt(cameraPos);
+    // 只在散开状态可见
+    meshRef.current.visible = isVisible;
     
-    // 确保可见
-    meshRef.current.visible = true;
-    meshRef.current.renderOrder = 999;
-    
-    if (meshRef.current.material) {
-      const material = meshRef.current.material as THREE.MeshBasicMaterial;
-      material.depthTest = false;
-      material.depthWrite = false;
-      material.transparent = true;
-      material.opacity = 1;
-      material.needsUpdate = true;
-    }
-    
-    if (isVisible && !isSelected) {
-      idleTimer.current += delta;
-      if (idleTimer.current > 2) {
-        rotationVelocity.current = 0.1;
+    if (isVisible) {
+      // 朝向相机
+      meshRef.current.lookAt(cameraPos);
+      meshRef.current.renderOrder = 999;
+      
+      if (meshRef.current.material) {
+        const material = meshRef.current.material as THREE.MeshBasicMaterial;
+        material.depthTest = false;
+        material.depthWrite = false;
+        material.transparent = true;
+        material.opacity = THREE.MathUtils.lerp(opacityRef.current, 1, delta * 3);
+        material.needsUpdate = true;
       }
+      
+      if (!isSelected) {
+        idleTimer.current += delta;
+        if (idleTimer.current > 2) {
+          rotationVelocity.current = 0.1;
+        }
+      }
+      
+      meshRef.current.position.lerp(targetPosition.current, delta * 3);
+      
+      const scaleLerp = THREE.MathUtils.lerp(currentScale.current, targetScale.current, delta * 5);
+      currentScale.current = scaleLerp;
+      meshRef.current.scale.set(scaleLerp, scaleLerp, scaleLerp);
     }
-    
-    meshRef.current.position.lerp(targetPosition.current, delta * 3);
-    
-    const scaleLerp = THREE.MathUtils.lerp(currentScale.current, targetScale.current, delta * 5);
-    currentScale.current = scaleLerp;
-    meshRef.current.scale.set(scaleLerp, scaleLerp, scaleLerp);
   });
   
   const material = useMemo(() => {
@@ -161,7 +163,7 @@ const PhotoPlane: React.FC<PhotoPlaneProps> = ({
       material={material}
       scale={[0.3, 0.3, 0.3]}
     >
-      <planeGeometry args={[10, 10]} />
+      <planeGeometry args={[6, 6]} />
     </mesh>
   );
 };
@@ -301,13 +303,10 @@ export const PhotoPlanes: React.FC<PhotoPlanesProps> = ({ state, photoPaths }) =
     if (!groupRef.current) return;
     
     const isVisible = state === 'SCATTERED';
-    groupRef.current.visible = true; // 始终可见
-    groupRef.current.renderOrder = 1000;
+    groupRef.current.visible = isVisible;
     
-    if (isVisible) {
-      if (selectedIndex === null) {
-        groupRef.current.rotation.y += delta * 0.1;
-      }
+    if (isVisible && selectedIndex === null) {
+      groupRef.current.rotation.y += delta * 0.1;
     }
   });
   
