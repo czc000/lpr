@@ -119,8 +119,8 @@ const PhotoPlane: React.FC<PhotoPlaneProps> = ({
     
     if (meshRef.current.material) {
       const material = meshRef.current.material as THREE.MeshBasicMaterial;
-      opacityRef.current = THREE.MathUtils.lerp(opacityRef.current, targetOpacity.current, delta * 0.5);
-      const renderOpacity = opacityRef.current * (isSelected ? 1 : 0.3);
+      opacityRef.current = THREE.MathUtils.lerp(opacityRef.current, targetOpacity.current, delta * 2);
+      const renderOpacity = Math.max(0.8, opacityRef.current);
       material.opacity = renderOpacity;
     }
   });
@@ -131,7 +131,7 @@ const PhotoPlane: React.FC<PhotoPlaneProps> = ({
       return new THREE.MeshBasicMaterial({
         color: 0xff0000,
         transparent: true,
-        opacity: 0
+        opacity: 1
       });
     }
     
@@ -139,11 +139,11 @@ const PhotoPlane: React.FC<PhotoPlaneProps> = ({
     return new THREE.MeshBasicMaterial({
       map: texture,
       transparent: true,
-      opacity: 0,
+      opacity: 1,
       side: THREE.DoubleSide,
       depthWrite: false,
       toneMapped: false,
-      color: new THREE.Color(0.9, 0.9, 0.9)
+      color: new THREE.Color(1, 1, 1)
     });
   }, [texture]);
   
