@@ -3,8 +3,8 @@ import * as THREE from 'three';
 import { useFrame, useThree } from '@react-three/fiber';
 import { ParticleState } from '../types';
 
-const PHOTO_COUNT = 8;
-const PHOTO_SPREAD_RADIUS = 10;
+const PHOTO_COUNT = 12;
+const PHOTO_SPREAD_RADIUS = 15;
 
 function createSpiralPositions(count: number, radius: number): Array<{ position: [number, number, number], rotation: [number, number, number] }> {
   const positions: Array<{ position: [number, number, number], rotation: [number, number, number] }> = [];
@@ -50,8 +50,8 @@ const PhotoPlane: React.FC<PhotoPlaneProps> = ({
   const meshRef = useRef<THREE.Mesh>(null);
   const { camera } = useThree();
   const targetPosition = useRef(new THREE.Vector3(...position));
-  const currentScale = useRef(0.3);
-  const targetScale = useRef(0.3);
+  const currentScale = useRef(1.5);
+  const targetScale = useRef(1.5);
   const opacityRef = useRef(0);
   const targetOpacity = useRef(0);
   const rotationVelocity = useRef(0);
@@ -72,24 +72,24 @@ const PhotoPlane: React.FC<PhotoPlaneProps> = ({
   
   useEffect(() => {
     if (isVisible) {
-      const delay = index * 200;
+      const delay = index * 300;
       const timeout = setTimeout(() => {
         targetOpacity.current = 1;
       }, delay);
       return () => clearTimeout(timeout);
     } else {
-      targetOpacity.current = 0;
-      opacityRef.current = 0;
+      targetOpacity.current = 1;
+      opacityRef.current = 1;
       rotationVelocity.current = 0;
     }
   }, [isVisible, index]);
   
   useEffect(() => {
     if (isSelected) {
-      targetScale.current = 1;
-      targetPosition.current.set(0, 0.5, -5);
+      targetScale.current = 3;
+      targetPosition.current.set(0, 0.5, -8);
     } else {
-      targetScale.current = 0.3;
+      targetScale.current = 1.5;
       targetPosition.current.set(...position);
     }
   }, [isSelected, position]);
@@ -113,15 +113,14 @@ const PhotoPlane: React.FC<PhotoPlaneProps> = ({
     
     meshRef.current.position.lerp(targetPosition.current, delta * 3);
     
-    const scaleLerp = THREE.MathUtils.lerp(currentScale.current, targetScale.current, delta * 3);
+    const scaleLerp = THREE.MathUtils.lerp(currentScale.current, targetScale.current, delta * 5);
     currentScale.current = scaleLerp;
     meshRef.current.scale.set(scaleLerp, scaleLerp, scaleLerp);
     
     if (meshRef.current.material) {
       const material = meshRef.current.material as THREE.MeshBasicMaterial;
-      opacityRef.current = THREE.MathUtils.lerp(opacityRef.current, targetOpacity.current, delta * 2);
-      const renderOpacity = Math.max(0.8, opacityRef.current);
-      material.opacity = renderOpacity;
+      opacityRef.current = THREE.MathUtils.lerp(opacityRef.current, targetOpacity.current, delta * 3);
+      material.opacity = Math.max(0.95, opacityRef.current);
     }
   });
   
@@ -154,7 +153,7 @@ const PhotoPlane: React.FC<PhotoPlaneProps> = ({
       material={material}
       scale={[0.3, 0.3, 0.3]}
     >
-      <planeGeometry args={[4, 4]} />
+      <planeGeometry args={[10, 10]} />
     </mesh>
   );
 };
